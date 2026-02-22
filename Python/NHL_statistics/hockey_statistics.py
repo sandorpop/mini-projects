@@ -4,7 +4,13 @@ class FileHandler:
     def __init__(self, filename):
         self.__filename = filename
         
-    def read(self):
+    def read(self) -> list[dict]:
+        """
+        Reads JSON data from file and returns it as a list of dictionaries.
+
+        Raises:
+            ValueError: If file name is incorrect or JSON format is invalid.
+        """
         try:
             with open(self.__filename) as file:
                 content = file.read()
@@ -13,6 +19,8 @@ class FileHandler:
         return json.loads(content)
     
 class Player:
+    """Represents a single NHL player and their statistics."""
+
     def __init__(self, name, nationality, assists, goals, penalties, team, games):
         self.name = name
         self.nationality = nationality
@@ -22,22 +30,35 @@ class Player:
         self.penalties = penalties
         self.games = games
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns formatted string representation of player stats."""
         return f"{self.name:20} {self.team:3} {self.goals:>3} + {self.assists:>2} = {self.goals+self.assists:>3}"
     
     
 class Stats:
+    """Stores and manages player statistics."""
     def __init__(self):
         self.__players = []
         
-    def add_player(self, name, nationality, assists, goals, penalties, team, games):
+    def add_player(self, name, nationality, assists, goals, penalties, team, games) -> None:
+        """Adds a Player object to the statistics collection."""
         self.__players.append(Player(name, nationality, assists, goals, penalties, team, games))
     
-    def search(self, name):
-        return [player for player in self.__players if player.name == name]
+    def search(self, name) -> list[Player]:
+        """Returns players matching the given name."""
+        return [player for player in self.__players if player.name.lower() == name.lower()]
     
-    def all_entries(self):
-        return self.__players
+    def all_entries(self) -> list[Player]:
+        """Returns a copy of all stored players."""
+        return list(self.__players)
+    
+    def players_by_team(self, team: str) -> list[Player]:
+        """Returns all players belonging to a specific team."""
+        return [player for player in self.__players if player.team.lower() == team.lower()]
+
+    def players_by_country(self, country: str) -> list[Player]:
+        """Returns all players from a specific country."""
+        return [player for player in self.__players if player.nationality.lower() == country.lower()]
     
     
 class StatsApplication:
@@ -63,37 +84,49 @@ class StatsApplication:
         for country in countries:
             print(country)
             
-    def sort_by_points(self, players: list):
-        
-        def order_by_points(player: Player):
-            return player.goals + player.assists, player.goals
-        
-        return sorted(players, key=order_by_points, reverse=True)
+    def sort_by_points(self, players: list) -> list[Player]:
+        """Returns players sorted by points and goals."""
+        return sorted(players, key=lambda p:(p.goals + p.assists, p.goals), reverse=True)
     
-    def team_players(self):
+    def team_players(self) -> None:
         team = input("team: ")
-        players = [player for player in self.__stats.all_entries() if player.team == team]
+        players = self.__stats.players_by_team(team)
+        if len(players) == 0:
+            print(f"no players in {team}")
+            return
         for player in self.sort_by_points(players):
             print(player)
             
-    def country_players(self):
+    def country_players(self) -> None:
         country = input("country: ")
-        players = [player for player in self.__stats.all_entries() if player.nationality == country]
+        players = self.__stats.players_by_country(country)
+        if len(players) == 0:
+            print(f"no players in {country}")
+            return
         for player in self.sort_by_points(players):
             print(player)
             
-    def most_points(self):
-        n = int(input("how many: "))
+    def most_points(self) -> None:
+        try:
+            n = int(input("how many: "))
+        except ValueError:
+            print("Please enter a valid number.")
+            return
         for player in self.sort_by_points(self.__stats.all_entries())[:n]:
             print(player)
             
-    def most_goals(self):
-        n = int(input("how many: "))        
+    def most_goals(self) -> None:
+        try:
+            n = int(input("how many: "))
+        except ValueError:
+            print("Please enter a valid number.")
+            return      
         players = sorted(self.__stats.all_entries(), key=lambda p:(-p.goals, p.games))
         for player in players[:n]:
             print(player)
             
-    def help(self):
+    def help(self) -> None:
+        """Displays available commands."""
         print("commands:")
         print("0 quit")
         print("1 search for player")
@@ -104,7 +137,7 @@ class StatsApplication:
         print("6 most points")
         print("7 most goals")
         
-    def load_players(self):
+    def load_players(self) -> None:
         filename = input("file name: ")
         handler = FileHandler(filename)
         players = handler.read()
@@ -114,6 +147,7 @@ class StatsApplication:
         print()
         
     def execute(self):
+        """Starts the command-line application."""
         self.load_players()
         self.help()
         
@@ -141,21 +175,6 @@ class StatsApplication:
         
         
             
-        
-    
-    
-application = StatsApplication()
-application.execute()
-    
-    
-# handler = FileHandler("partial.json")
-# partial = handler.read()
-
-# print(partial)
-# leon = Player("Leon Draisaitl","EDM", 43, 67)
-# markus = Player("Markus Granlund", "EDM", 3, 1)
-# mike = Player("Mike Green", "NJD", 3, 8)
-# print(leon)
-# print(mike)
-# print(markus)
-# print("123456789012345678901234567890123456789")
+if __name__ == "__main__":
+    application = StatsApplication()
+    application.execute()
