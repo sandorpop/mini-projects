@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
 from datetime import datetime
 
 class PostBase(BaseModel):
@@ -11,7 +11,27 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
 class Post(PostBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    owner_id: int
+    owner: UserOut
+    model_config = {"from_attributes": True}
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+        
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    
+class TokenData(BaseModel):
+    id: Optional[str]=None
