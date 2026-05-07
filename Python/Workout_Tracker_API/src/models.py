@@ -54,6 +54,7 @@ class Workout(Base):
     owner = relationship("User")
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    exercises = relationship("WorkoutExercise", lazy="joined", cascade="all, delete-orphan")
     
 class WorkoutExercise(Base):
     __tablename__ = "workout_exercises"
@@ -61,8 +62,7 @@ class WorkoutExercise(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     workout_id = Column(Integer, ForeignKey("workouts.id", ondelete="CASCADE"), nullable=False)
     exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False)
-    exercise = relationship("Exercise")
-    workout = relationship("Workout")
+    exercise = relationship("Exercise", lazy="joined")
     sets = Column(Integer, nullable=False)
     reps = Column(Integer, nullable=False)
     weight_kg = Column(Float(precision=2), nullable=True)
@@ -75,8 +75,9 @@ class ScheduledWorkout(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     workout_id = Column(Integer, ForeignKey("workouts.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    workout = relationship("Workout")
+    workout = relationship("Workout", lazy="joined")
     user = relationship("User")
+    workout_logs = relationship("WorkoutLog", cascade="all, delete-orphan")
     scheduled_at = Column(TIMESTAMP(timezone=True), nullable=False)
     status = Column(Enum(Status), nullable=False, default=Status.PENDING)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
@@ -94,6 +95,7 @@ class WorkoutLog(Base):
     duration_minutes = Column(Integer, nullable=True)
     notes = Column(String, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    log_exercises = relationship("WorkoutLogExercise", cascade="all, delete-orphan")
     
 class WorkoutLogExercise(Base):
     __tablename__ = "workout_log_exercises"
