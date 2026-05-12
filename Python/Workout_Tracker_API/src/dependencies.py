@@ -50,3 +50,17 @@ def get_own_scheduled_workout(
     if workout.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
     return workout
+
+def get_log_or_404(id: int, db: Session = Depends(get_db)) -> models.WorkoutLog:
+    log = db.query(models.WorkoutLog).filter(models.WorkoutLog.id == id).first()
+    if not log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workout log not found")
+    return log
+
+def get_own_log(
+    log = Depends(get_log_or_404),
+    current_user = Depends(oauth2.get_current_user)
+) -> models.WorkoutLog:
+    if log.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
+    return log

@@ -64,3 +64,32 @@ class ScheduledWorkoutOut(ScheduledWorkoutBase):
     
 class ScheduledWorkoutStatusUpdate(BaseModel):
     status: Status
+    
+class WorkoutLogExerciseCreate(BaseModel):
+    exercise_id: int
+    sets_completed: int
+    reps_completed: int
+    weight_used_kg: Optional[float] = None
+    notes: Optional[str] = None
+
+class WorkoutLogExerciseOut(WorkoutLogExerciseCreate):
+    id: int
+    created_at: datetime
+    exercise: ExerciseOut
+    model_config = {"from_attributes": True}
+    
+class WorkoutLogCreate(BaseModel):
+    scheduled_workout_id: int
+    duration_minutes: Optional[int] = None
+    notes: Optional[str] = None
+
+class WorkoutLogOut(BaseModel):
+    id: int
+    scheduled_workout_id: int
+    user_id: int
+    completed_at: datetime
+    duration_minutes: Optional[int] = None
+    notes: Optional[str] = None
+    created_at: datetime
+    log_exercises: List[WorkoutLogExerciseOut]
+    model_config = {"from_attributes": True}

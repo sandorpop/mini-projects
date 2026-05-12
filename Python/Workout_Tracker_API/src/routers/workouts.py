@@ -106,3 +106,35 @@ def delete_scheduled_workout(current_workout = Depends(dependencies.get_own_sche
     db.delete(current_workout)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/logs", response_model=workout.WorkoutLogOut, status_code=status.HTTP_201_CREATED)
+def create_workout_log(log_data: workout.WorkoutLogCreate, current_user = Depends(oauth2.get_current_user), db: Session = Depends(get_db)):
+    scheduled_workout = db.query(models.ScheduledWorkout).filter(models.ScheduledWorkout.id == log_data.scheduled_workout_id).first()
+    if not scheduled_workout:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scheduled workout not found")
+    if scheduled_workout.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    new_log = models.WorkoutLog(scheduled_workout_id=log_data.scheduled_workout_id, user_id=current_user.id, duration_minutes=log_data.duration_minutes, notes=log_data.notes)
+    db.add(new_log)
+    if scheduled_workout.status == models.Status.ACTIVE:
+        scheduled_workout.status = models.Status.COMPLETED
+        db.add(scheduled_workout)
+    db.commit()
+    db.refresh(new_log)
+    return new_log
+
+@router.post("/logs/{id}/exercises", response_model=workout.WorkoutLogOut, status_code=status.HTTP_201_CREATED)
+def create_log_exercises(exercises_data: List[workout.WorkoutLogExerciseCreate], db: Session = Depends(get_db), current_log = Depends(dependencies.get_own_log)):
+    try:
+        log_id = current_log.id
+        for exercise in exercises_data:
+            new_log_exercise = models.WorkoutLogExercise(log_id=log_id, **exercise.model_dump())
+            db.add(new_log_exercise)
+        db.commit()
+        db.refresh(current_log)
+        return current_log
+    except Exception as e:
+        db.rollback()
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to log exercises")
