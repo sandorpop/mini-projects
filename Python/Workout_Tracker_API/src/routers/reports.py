@@ -19,7 +19,8 @@ def get_workout_summary(current_user = Depends(oauth2.get_current_user), db: Ses
     
     avg_duration = db.query(func.avg(models.WorkoutLog.duration_minutes)).filter(models.WorkoutLog.user_id == current_user.id).scalar()
     
-    week_start = datetime.now(timezone.utc) - timedelta(days=datetime.now(timezone.utc).weekday())
+    today = datetime.now(timezone.utc)
+    week_start = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     workouts_this_week = db.query(func.count(models.WorkoutLog.id)).filter(models.WorkoutLog.user_id == current_user.id, models.WorkoutLog.completed_at >= week_start).scalar()
     
     most_trained = db.query(models.Exercise.muscle_group, func.count(models.Exercise.muscle_group).label("count")).join(models.WorkoutLogExercise, models.WorkoutLogExercise.exercise_id == models.Exercise.id).join(models.WorkoutLog, models.WorkoutLog.id == models.WorkoutLogExercise.log_id).filter(models.WorkoutLog.user_id == current_user.id).group_by(models.Exercise.muscle_group).order_by(func.count(models.Exercise.muscle_group).desc()).first()
