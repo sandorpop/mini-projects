@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from . import models
-from .database import engine
 from .routers import auth, exercises, workouts, reports
 
-models.Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
+app = FastAPI(
+    title="Workout Tracker API",
+    description="A REST API for tracking workouts, exercises, and progress.",
+    version="1.0.0"
+)
 
 app.include_router(auth.router)
 app.include_router(exercises.router)
