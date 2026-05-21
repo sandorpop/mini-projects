@@ -1,12 +1,16 @@
 # Workout Tracker API
 
-A REST API for managing workouts, tracking progress, and generating reports. Built with FastAPI and PostgreSQL.
+A REST API for managing workouts, tracking progress, and generating reports. 
+Built with FastAPI and PostgreSQL, featuring JWT authentication, a seeded exercise 
+library, workout scheduling with status transitions, and aggregate reporting on 
+training volume and progression over time.
 
 ## Tech Stack
 
 - Python, FastAPI, SQLAlchemy, PostgreSQL
 - JWT Authentication, bcrypt
 - Alembic migrations
+- Docker, Docker Compose
 - pytest
 
 ## Setup
@@ -42,6 +46,24 @@ Create a test database with the same name as your main database suffixed with `_
 ```bash
 pytest -v -s
 ```
+The test suite covers 77 tests across auth, exercises, workouts, scheduled workouts, workout logs, and reports.
+
+## Running with Docker
+
+1. Create a `.env.docker` file based on `.env.docker.example`
+2. Start the containers
+```bash
+   docker-compose up --build
+```
+3. Run migrations
+```bash
+   docker-compose exec api alembic upgrade head
+```
+4. Seed exercises
+```bash
+   docker-compose exec api python -m scripts.seed_exercises
+```
+5. API available at `http://localhost:8000`
 
 ## API Reference
 
@@ -93,3 +115,4 @@ Interactive docs available at `http://localhost:8000/docs` after starting the se
 - Reports - total volume, weekly frequency, per-exercise progression over time
 - Custom exercises per user alongside seeded exercise library
 - Database migrations with Alembic
+- Containerized with Docker and Docker Compose
