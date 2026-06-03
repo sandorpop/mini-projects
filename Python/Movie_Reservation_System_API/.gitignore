@@ -1,0 +1,32 @@
+# Environment
+.env
+.env.docker
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Django
+media/
+staticfiles/
+db.sqlite3
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
