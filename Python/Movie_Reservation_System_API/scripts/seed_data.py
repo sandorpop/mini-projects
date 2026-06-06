@@ -6,6 +6,7 @@ django.setup()
 
 from apps.users.models import User, Role
 from apps.movies.models import Genre
+from apps.cinemas.models import Cinema
 
 def seed_genres():
     genres = [
@@ -46,6 +47,15 @@ def seed_admin():
     else:
         print("Admin already exists, skipping.")
 
+def seed_cinema():
+    if not Cinema.objects.filter(name="Cinema City").exists():
+        cinema = Cinema.objects.create(name="Cinema City", total_seats=100)
+        cinema.generate_seats()
+        print("Cinema seeded.")
+    else:
+        print("Cinema already exists, skipping.")
+
 if __name__ == '__main__':
     seed_genres()
     seed_admin()
+    seed_cinema()
