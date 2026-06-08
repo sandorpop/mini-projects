@@ -4,10 +4,12 @@ from ..movies.models import Movie
 from ..cinemas.models import Cinema
 from ..movies.serializers import MovieSerializer
 from ..cinemas.serializers import CinemaSerializer
+from ..reservations.models import ReservationSeat
 
 def calculate_available_seats(obj):
-    # to be implemented after reservations are implemented
-    return obj.cinema.total_seats
+    reserved_seats = ReservationSeat.objects.filter(showtime=obj, reservation__status='confirmed').count()
+    
+    return obj.cinema.total_seats - reserved_seats
 
 class ShowtimeSerializer(serializers.ModelSerializer):
     movie = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all())
