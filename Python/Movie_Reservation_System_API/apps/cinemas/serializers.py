@@ -17,6 +17,12 @@ class CinemaSerializer(serializers.ModelSerializer):
         cinema.generate_seats()
         return cinema
 
+class CinemaUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cinema
+        fields = ['id', 'name', 'total_seats']
+        read_only_fields = ['total_seats']
+
 class CinemaDetailSerializer(serializers.ModelSerializer):
     seats = SeatSerializer(many=True, read_only=True)
     

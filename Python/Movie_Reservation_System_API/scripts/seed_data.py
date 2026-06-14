@@ -37,7 +37,6 @@ def seed_genres():
 def seed_admin():
     if not User.objects.filter(role=Role.ADMIN).exists():
         User.objects.create_superuser(
-            username='admin@cinema.com',
             email='admin@cinema.com',
             full_name='System Admin',
             password='admin123',
